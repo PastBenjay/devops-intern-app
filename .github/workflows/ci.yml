@@ -16,10 +16,10 @@ jobs:
         run: docker build -t bash-app ./bash-app
 
       - name: Run app
-        run: docker run bash-app
+        run: docker run --rm bash-app
 
       - name: Run tests
-        run: docker run --entrypoint sh bash-app tests/test_run.sh
+        run: docker run --rm --entrypoint sh bash-app tests/test_run.sh
 
   java-app:
     runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
         run: docker build -t java-app ./java-app
 
       - name: Run app
-        run: docker run java-app
+        run: docker run --rm java-app
 
   python-app:
     runs-on: ubuntu-latest
@@ -41,10 +41,10 @@ jobs:
         run: docker build -t python-app ./python-app
 
       - name: Run app
-        run: docker run python-app
+        run: docker run --rm python-app
 
       - name: Run tests
-        run: docker run --entrypoint pytest python-app tests/test_app.py
+        run: docker run --rm --entrypoint pytest python-app tests/test_app.py
 
   push-images:
     runs-on: ubuntu-latest
