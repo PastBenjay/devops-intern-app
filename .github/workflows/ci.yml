@@ -16,10 +16,12 @@ jobs:
         run: docker build -t bash-app ./bash-app
 
       - name: Run app
-        run: docker run --rm bash-app
+        run: docker run --rm -i bash-app
+        timeout-minutes: 2
 
       - name: Run tests
-        run: docker run --rm --entrypoint sh bash-app tests/test_run.sh
+        run: docker run --rm -i --entrypoint sh bash-app tests/test_run.sh
+        timeout-minutes: 2
 
   java-app:
     runs-on: ubuntu-latest
@@ -30,7 +32,8 @@ jobs:
         run: docker build -t java-app ./java-app
 
       - name: Run app
-        run: docker run --rm java-app
+        run: docker run --rm -i java-app
+        timeout-minutes: 2
 
   python-app:
     runs-on: ubuntu-latest
@@ -41,10 +44,12 @@ jobs:
         run: docker build -t python-app ./python-app
 
       - name: Run app
-        run: docker run --rm python-app
+        run: docker run --rm -i python-app
+        timeout-minutes: 2
 
       - name: Run tests
-        run: docker run --rm --entrypoint pytest python-app tests/test_app.py
+        run: docker run --rm -i --entrypoint pytest python-app tests/test_app.py
+        timeout-minutes: 2
 
   push-images:
     runs-on: ubuntu-latest
