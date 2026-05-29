@@ -1,0 +1,87 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  bash-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t bash-app ./bash-app
+
+      - name: Run app
+        run: docker run bash-app
+
+      - name: Run tests
+        run: docker run --entrypoint sh bash-app tests/test_run.sh
+
+  java-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t java-app ./java-app
+
+      - name: Run app
+        run: docker run java-app
+
+  python-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t python-app ./python-app
+
+      - name: Run app
+        run: docker run python-app
+
+      - name: Run tests
+        run: docker run --entrypoint pytest python-app tests/test_app.py
+
+  push-images:
+    runs-on: ubuntu-latest
+    needs: [bash-app, java-app, python-app]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push bash-app
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bash-app:latest \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/bash-app:${{ github.sha }} \
+            ./bash-app
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bash-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/bash-app:${{ github.sha }}
+
+      - name: Build and push java-app
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/java-app:latest \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/java-app:${{ github.sha }} \
+            ./java-app
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/java-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/java-app:${{ github.sha }}
+
+      - name: Build and push python-app
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/python-app:latest \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/python-app:${{ github.sha }} \
+            ./python-app
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/python-app:${{ github.sha }}

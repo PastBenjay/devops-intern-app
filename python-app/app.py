@@ -1,4 +1,5 @@
 import os
+import time
 from dotenv import load_dotenv
 from requests import Request
 
@@ -16,5 +17,5 @@ def main() -> None:
     message = build_greeting(name)
     print(message)
 
-if __name__ == "__main__":
-    main()
+    while True:
+        time.sleep(3600)
