@@ -1,12 +1,13 @@
-FROM alpine:3.19
+FROM alpine:3.19 AS base
 
 WORKDIR /app
-
 COPY run.sh .
 COPY tests/ tests/
-
 RUN chmod +x run.sh tests/test_run.sh
 
-ENV NAME=Intern
+FROM base AS test
+RUN ./tests/test_run.sh
 
-CMD ["/bin/sh", "-c", "./run.sh; exit 0"]
+FROM base AS final
+ENV NAME=Intern
+CMD ["/bin/sh", "./run.sh"]

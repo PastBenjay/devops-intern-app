@@ -12,45 +12,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build image
-        run: docker build -t bash-app ./bash-app
+      - name: Build and test
+        run: docker build --target test -t bash-app-test ./bash-app
 
-      - name: Run app and tests
-        run: |
-          output=$(docker run --rm bash-app /bin/sh -c "./run.sh")
-          echo "Output: $output"
-          expected="Hello, Intern! This is a simple Bash app running in Docker."
-          if [ "$output" = "$expected" ]; then
-            echo "TEST PASSED"
-          else
-            echo "TEST FAILED"
-            exit 1
-          fi
+      - name: Build final image
+        run: docker build --target final -t bash-app ./bash-app
 
   java-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build image
+      - name: Build and test
         run: docker build -t java-app ./java-app
-
-      - name: Run app
-        run: docker run --rm java-app
 
   python-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build image
-        run: docker build -t python-app ./python-app
+      - name: Build and test
+        run: docker build --target test -t python-app-test ./python-app
 
-      - name: Run app
-        run: docker run --rm python-app
-
-      - name: Run tests
-        run: docker run --rm --entrypoint pytest python-app tests/test_app.py
+      - name: Build final image
+        run: docker build --target final -t python-app ./python-app
 
   push-images:
     runs-on: ubuntu-latest
@@ -67,7 +52,7 @@ jobs:
 
       - name: Build and push bash-app
         run: |
-          docker build \
+          docker build --target final \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bash-app:latest \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/bash-app:${{ github.sha }} \
             ./bash-app
@@ -85,7 +70,7 @@ jobs:
 
       - name: Build and push python-app
         run: |
-          docker build \
+          docker build --target final \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/python-app:latest \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/python-app:${{ github.sha }} \
             ./python-app
