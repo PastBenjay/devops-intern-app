@@ -1,0 +1,41 @@
+# CI Pipeline for python-app
+# Triggers on every push or pull request to main branch
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    # Use latest Ubuntu as the runner environment
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      # Required so the runner has access to our files
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Build the Docker image using the development stage
+      # --target development ensures tests folder is included
+      # --build-arg sets NAME at build time as required by the Dockerfile
+      - name: Build Docker image
+        run: |
+          docker build \
+            --target development \
+            --build-arg NAME=Intern \
+            -t python-app:dev \
+            ./python-app
+
+      # Step 3: Run the test suite inside the container
+      # We override CMD to run pytest instead of the app
+      # -v gives verbose output showing each test result
+      - name: Run tests
+        run: |
+          docker run --rm \
+            --entrypoint python \
+            python-app:dev \
+            -m pytest tests/test_app.py -v
