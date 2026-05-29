@@ -1,56 +1,58 @@
 # =============================================================
 # Stage 1: Development
-# Using official Python 3.12 slim image - lightweight but full
-# featured, sourced from Docker Official Image on DockerHub
+# Using official Python 3.12 slim image from Docker Official Images
+# Includes development and testing dependencies
 # =============================================================
 FROM python:3.12-slim AS development
 
-# Set working directory inside the container
+# Set working directory inside container
 WORKDIR /app
 
-# Accept NAME as a build argument with default value of Intern
+# Build argument with default value
 ARG NAME=Intern
 
-# Set NAME as an environment variable so the app can access it
+# Set NAME as environment variable
 ENV NAME=${NAME}
 
-# Copy dependency file first for better layer caching
+# Copy dependency definition first for better Docker caching
 COPY pyproject.toml .
 
-# Install all dependencies including dev/test dependencies (pytest)
+# Install application + development dependencies
 RUN pip install --no-cache-dir ".[dev]"
 
 # Copy application source code
 COPY app.py .
 
-# Copy tests folder - needed in development for running tests
+# Copy tests for development/testing stage
 COPY tests/ tests/
 
-# Run the application using Python
+# Default command to run the application
 CMD ["python", "app.py"]
 
 # =============================================================
 # Stage 2: Production
-# Builds on development stage but excludes tests
-# Uses slim image for minimal size
+# Lightweight production image without test dependencies
 # =============================================================
 FROM python:3.12-slim AS production
 
 # Set working directory
 WORKDIR /app
 
-# Accept and set NAME build argument
+# Build argument
 ARG NAME=Intern
+
+# Environment variable
 ENV NAME=${NAME}
 
-# Copy only the dependency file
+# Copy dependency file
 COPY pyproject.toml .
 
-# Install only production dependencies, no dev/test packages
+# Install only production dependencies
 RUN pip install --no-cache-dir .
 
-# Copy only the application code - NO tests folder
+# Copy only required application file
 COPY app.py .
 
-# Run the application
+# Run application
 CMD ["python", "app.py"]
+```
