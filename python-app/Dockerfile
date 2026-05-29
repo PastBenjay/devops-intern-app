@@ -1,58 +1,56 @@
 # =============================================================
 # Stage 1: Development
-# Using official Python 3.12 slim image from Docker Official Images
-# Includes development and testing dependencies
+# Using official Python 3.12 slim image - lightweight but full
+# featured, sourced from Docker Official Image on DockerHub
 # =============================================================
 FROM python:3.12-slim AS development
 
-# Set working directory inside container
+# Set working directory inside the container
 WORKDIR /app
 
-# Build argument with default value
+# Accept NAME as a build argument with default value of Intern
 ARG NAME=Intern
 
-# Set NAME as environment variable
+# Set NAME as an environment variable so the app can access it
 ENV NAME=${NAME}
 
-# Copy dependency definition first for better Docker caching
+# Copy dependency file first for better layer caching
 COPY pyproject.toml .
 
-# Install application + development dependencies
+# Install all dependencies including dev/test dependencies (pytest)
 RUN pip install --no-cache-dir ".[dev]"
 
 # Copy application source code
 COPY app.py .
 
-# Copy tests for development/testing stage
+# Copy tests folder - needed in development for running tests
 COPY tests/ tests/
 
-# Default command to run the application
+# Run the application using Python
 CMD ["python", "app.py"]
 
 # =============================================================
 # Stage 2: Production
-# Lightweight production image without test dependencies
+# Builds on development stage but excludes tests
+# Uses slim image for minimal size
 # =============================================================
 FROM python:3.12-slim AS production
 
 # Set working directory
 WORKDIR /app
 
-# Build argument
+# Accept and set NAME build argument
 ARG NAME=Intern
-
-# Environment variable
 ENV NAME=${NAME}
 
-# Copy dependency file
+# Copy only the dependency file
 COPY pyproject.toml .
 
-# Install only production dependencies
+# Install only production dependencies, no dev/test packages
 RUN pip install --no-cache-dir .
 
-# Copy only required application file
+# Copy only the application code - NO tests folder
 COPY app.py .
 
-# Run application
+# Run the application
 CMD ["python", "app.py"]
-```
