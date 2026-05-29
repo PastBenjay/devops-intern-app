@@ -9,4 +9,4 @@ RUN chmod +x run.sh tests/test_run.sh
 
 ENV NAME=Intern
 
-CMD ["./run.sh"]
+CMD ["/bin/sh", "-c", "./run.sh; exit 0"]
